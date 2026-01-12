@@ -1,0 +1,355 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="wheelchair">
+
+  <!-- ====== Params ====== -->
+  <xacro:property name="mesh_scale" value="0.001 0.001 0.001"/> <!-- mm -> m -->
+
+  <!-- wheel geometry (from STL bbox estimate) -->
+  <xacro:property name="rear_wheel_radius" value="0.2506"/>
+  <xacro:property name="rear_wheel_width"  value="0.025"/>   <!-- collision -->
+  <xacro:property name="caster_radius"     value="0.0600"/>
+  <xacro:property name="caster_width"      value="0.04"/>   <!-- collision -->
+
+  <!-- placements: TUNE THESE in RViz -->
+  <xacro:property name="rear_wheel_x" value="-0.04"/>
+  <xacro:property name="rear_wheel_y" value="0.16"/>
+  <xacro:property name="rear_wheel_z" value="-0.225"/>
+
+  <xacro:property name="caster_x" value="0.4"/>
+  <xacro:property name="caster_y" value="-0.11"/>
+  <xacro:property name="caster_z" value="-0.3"/>
+
+  <!-- LiDAR shape-only params -->
+  <xacro:property name="lidar_radius" value="0.060"/>  <!-- [m] collision용 실린더 반지름 -->
+  <xacro:property name="lidar_height" value="0.100"/>  <!-- [m] collision용 실린더 높이 -->
+
+  <!-- Inertia macro -->
+  <xacro:include filename="inertia_utils.xacro"/>
+
+  <!-- ====== Materials ====== -->
+
+  <!-- light green (연두색) -->
+  <material name="light_green">
+    <color rgba="0.6 0.9 0.4 1.0"/>
+  </material>
+
+  <!-- red (빨간색) -->
+  <material name="red">
+    <color rgba="1.0 0.0 0.0 1.0"/>
+  </material>
+
+  <!-- gray (회색) -->
+  <material name="gray">
+    <color rgba="0.6 0.6 0.6 1.0"/>
+  </material>
+
+  <!-- blue (파란색) -->
+  <material name="blue">
+    <color rgba="0.0 0.3 1.0 1.0"/>
+  </material>
+
+  <!-- ====== Reference frame like pinky: base_footprint -> base_link (fixed) ====== -->
+  <link name="base_footprint"/>
+
+  <joint name="base_link_fixed_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <!-- If you want base_link lifted from ground, change z here -->
+    <origin xyz="0 0 0.45" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ====== base_link (Chair) ====== -->
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://robot_description/mesh/Chair.stl" scale="${mesh_scale}"/>
+      </geometry>
+      <material name="light_green"/>
+    </visual>
+
+    <!-- collision -->
+    <collision>
+      <origin xyz="0.13 0 0.03" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.70 0.32 0.65"/>
+      </geometry>
+    </collision>
+
+    <xacro:inertial_from_catia_G
+      m="38.846"
+      x_mm="29.483" y_mm="0.0" z_mm="-6.536"
+      Ixx="1.468" Iyy="2.963" Izz="1.895"
+      Ixy="0.0" Ixz="0.172" Iyz="0.0"/>
+
+  </link>
+
+  <!-- ========================================================= -->
+  <!-- LiDAR link/joint (shape only)                              -->
+  <!-- - lidar_link를 센서 프레임으로 사용 가능 (예: scan frame)     -->
+  <!-- - base_link에 fixed joint로 부착                             -->
+  <!-- - visual은 STL(mesh)로, collision은 단순 실린더로 유지        -->
+  <!-- ========================================================= -->
+
+  <link name="lidar_link_mount">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://robot_description/mesh/LiDAR.stl" scale="${mesh_scale}"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 ${lidar_height/2}" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="${lidar_radius}" length="${lidar_height}"/>
+      </geometry>
+    </collision>
+    <xacro:inertial_from_catia_G
+      m="1.352"
+      x_mm="0.0" y_mm="0.0" z_mm="49.988"
+      Ixx="0.002" Iyy="0.002" Izz="0.002"
+      Ixy="0.0" Ixz="0.0" Iyz="0.0"/>
+  </link>
+
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="lidar_link_mount"/>
+    <origin xyz="0 0 0.040" rpy="0 0 0"/>
+  </joint>
+
+  <link name="laser_link"/>
+
+  <joint name="laser_link_fixed_joint" type="fixed">
+      <parent link="lidar_link_mount"/>
+      <child link="laser_link"/>
+      <origin xyz="0.0 0 0.03" rpy="0 0 0"/>
+  </joint>
+
+
+  <!-- ====== Rear wheels ====== -->
+  <link name="left_rear_wheel_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://robot_description/mesh/Wheel.stl" scale="${mesh_scale}"/>
+      </geometry>
+      <material name="blue"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+      <geometry>
+        <cylinder radius="${rear_wheel_radius}" length="${rear_wheel_width}"/>
+      </geometry>
+    </collision>
+    <xacro:inertial_from_catia_G
+      m="3.645"
+      x_mm="-1.692" y_mm="10.0" z_mm="0.0"
+      Ixx="0.083" Iyy="0.166" Izz="0.083"
+      Ixy="0.0" Ixz="0.0" Iyz="0.0"/>
+  </link>
+
+  <joint name="left_rear_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="left_rear_wheel_link"/>
+    <origin xyz="${rear_wheel_x} ${rear_wheel_y} ${rear_wheel_z}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <link name="right_rear_wheel_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://robot_description/mesh/Wheel.stl" scale="${mesh_scale}"/>
+      </geometry>
+      <material name="blue"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+      <geometry>
+        <cylinder radius="${rear_wheel_radius}" length="${rear_wheel_width}"/>
+      </geometry>
+    </collision>
+    <xacro:inertial_from_catia_G
+      m="3.645"
+      x_mm="-1.692" y_mm="10.0" z_mm="0.0"
+      Ixx="0.083" Iyy="0.166" Izz="0.083"
+      Ixy="0.0" Ixz="0.0" Iyz="0.0"/>
+  </link>
+
+  <joint name="right_rear_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="right_rear_wheel_link"/>
+    <origin xyz="${rear_wheel_x} ${-rear_wheel_y} ${rear_wheel_z}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <!-- ====== Casters: bracket (swivel) + wheel (spin) ====== -->
+  <link name="left_caster_bracket_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://robot_description/mesh/caster_wheel_bracket.stl" scale="${mesh_scale}"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 -0.05" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.085 0.085 0.1"/>
+      </geometry>
+    </collision>
+    <xacro:inertial_from_catia_G
+      m="0.929"
+      x_mm="-0.01248" y_mm="9.0" z_mm="-38.698"
+      Ixx="0.002" Iyy="0.001" Izz="0.001"
+      Ixy="0.0" Ixz="0.0" Iyz="-1.214e-7"/>
+  </link>
+
+  <joint name="left_caster_swivel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="left_caster_bracket_link"/>
+    <origin xyz="${caster_x} ${-caster_y} ${caster_z}" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <link name="left_caster_wheel_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://robot_description/mesh/caster_wheel.stl" scale="${mesh_scale}"/>
+      </geometry>
+      <material name="red"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 ${caster_radius/2} 0" rpy="${pi/2} 0 0"/>
+      <geometry>
+        <cylinder radius="${caster_radius}" length="${caster_width}"/>
+      </geometry>
+    </collision>
+    <xacro:inertial_from_catia_G
+      m="0.447"
+      x_mm="0.0" y_mm="19.0" z_mm="0.0"
+      Ixx="4.742e-4" Iyy="8.478e-4" Izz="4.742e-4"
+      Ixy="0.0" Ixz="0.0" Iyz="0.0"/>
+  </link>
+
+  <joint name="left_caster_wheel_joint" type="continuous">
+    <parent link="left_caster_bracket_link"/>
+    <child link="left_caster_wheel_link"/>
+    <origin xyz="0 ${-caster_width/2} -0.095" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <link name="right_caster_bracket_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://robot_description/mesh/caster_wheel_bracket.stl" scale="${mesh_scale}"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 -0.05" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.085 0.085 0.1"/>
+      </geometry>
+    </collision>
+    <xacro:inertial_from_catia_G
+      m="0.929"
+      x_mm="-0.01248" y_mm="9.0" z_mm="-38.698"
+      Ixx="0.002" Iyy="0.001" Izz="0.001"
+      Ixy="0.0" Ixz="0.0" Iyz="-1.214e-7"/>
+  </link>
+
+  <joint name="right_caster_swivel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="right_caster_bracket_link"/>
+    <origin xyz="${caster_x} ${caster_y} ${caster_z}" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <link name="right_caster_wheel_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://robot_description/mesh/caster_wheel.stl" scale="${mesh_scale}"/>
+      </geometry>
+      <material name="red"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 ${caster_radius/2} 0" rpy="${pi/2} 0 0"/>
+      <geometry>
+        <cylinder radius="${caster_radius}" length="${caster_width}"/>
+      </geometry>
+    </collision>
+    <xacro:inertial_from_catia_G
+      m="0.447"
+      x_mm="0.0" y_mm="19.0" z_mm="0.0"
+      Ixx="4.742e-4" Iyy="8.478e-4" Izz="4.742e-4"
+      Ixy="0.0" Ixz="0.0" Iyz="0.0"/>
+  </link>
+
+  <joint name="right_caster_wheel_joint" type="continuous">
+    <parent link="right_caster_bracket_link"/>
+    <child link="right_caster_wheel_link"/>
+    <origin xyz="0 ${-caster_width/2} -0.095" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <!-- ================= Gazebo friction/contact for wheels ================= -->
+  <!-- Rear wheels: high traction -->
+  <gazebo reference="left_rear_wheel_link">
+    <mu1>1.2</mu1>
+    <mu2>1.2</mu2>
+    <slip1>0.001</slip1>
+    <slip2>0.001</slip2>
+    <kp>800000</kp>
+    <kd>80</kd>
+    <minDepth>0.001</minDepth>
+    <maxVel>0.1</maxVel>
+  </gazebo>
+
+  <gazebo reference="right_rear_wheel_link">
+    <mu1>1.2</mu1>
+    <mu2>1.2</mu2>
+    <slip1>0.001</slip1>
+    <slip2>0.001</slip2>
+    <kp>800000</kp>
+    <kd>80</kd>
+    <minDepth>0.001</minDepth>
+    <maxVel>0.1</maxVel>
+  </gazebo>
+
+  <!-- Casters: lower traction + a bit more slip -->
+  <gazebo reference="left_caster_wheel_link">
+    <mu1>0.6</mu1>
+    <mu2>0.6</mu2>
+    <slip1>0.01</slip1>
+    <slip2>0.01</slip2>
+    <kp>600000</kp>
+    <kd>60</kd>
+    <minDepth>0.001</minDepth>
+    <maxVel>0.1</maxVel>
+  </gazebo>
+
+  <gazebo reference="right_caster_wheel_link">
+    <mu1>0.6</mu1>
+    <mu2>0.6</mu2>
+    <slip1>0.01</slip1>
+    <slip2>0.01</slip2>
+    <kp>600000</kp>
+    <kd>60</kd>
+    <minDepth>0.001</minDepth>
+    <maxVel>0.1</maxVel>
+  </gazebo>
+
+</robot>

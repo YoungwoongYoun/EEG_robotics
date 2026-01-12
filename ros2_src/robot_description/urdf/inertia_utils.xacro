@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="inertial_from_catia_G"
+               params="m x_mm y_mm z_mm Ixx Iyy Izz Ixy Ixz Iyz">
+    <!-- mm -> m -->
+    <xacro:property name="x" value="${x_mm/1000.0}"/>
+    <xacro:property name="y" value="${y_mm/1000.0}"/>
+    <xacro:property name="z" value="${z_mm/1000.0}"/>
+
+    <!-- parallel-axis theorem -->
+    <xacro:property name="ixx_o" value="${Ixx + m*(y*y + z*z)}"/>
+    <xacro:property name="iyy_o" value="${Iyy + m*(x*x + z*z)}"/>
+    <xacro:property name="izz_o" value="${Izz + m*(x*x + y*y)}"/>
+    <xacro:property name="ixy_o" value="${Ixy - m*(x*y)}"/>
+    <xacro:property name="ixz_o" value="${Ixz - m*(x*z)}"/>
+    <xacro:property name="iyz_o" value="${Iyz - m*(y*z)}"/>
+
+    <inertial>
+      <origin xyz="${x} ${y} ${z}" rpy="0 0 0"/>
+      <mass value="${m}"/>
+      <inertia ixx="${ixx_o}" iyy="${iyy_o}" izz="${izz_o}"
+               ixy="${ixy_o}" ixz="${ixz_o}" iyz="${iyz_o}"/>
+    </inertial>
+  </xacro:macro>
+
+</robot>

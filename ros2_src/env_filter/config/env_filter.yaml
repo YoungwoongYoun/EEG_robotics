@@ -1,0 +1,19 @@
+env_filter:
+  ros__parameters:
+    # 거리 임계값
+    D_safe: 1.0
+    D_stop: 0.35
+    k: 0.3
+
+    # 토픽 이름
+    scan_topic: "/scan"
+    cmd_in_topic: "/cmd_vel_bci"
+    cmd_out_topic: "/cmd_vel"
+
+    # 전방 시야각 윈도우 [deg]
+    front_angle_min_deg: -30.0
+    front_angle_max_deg: 30.0
+
+    # d_min 계산 시 무효값 처리
+    range_min_clip: 0.01
+    range_max_clip: 30.0

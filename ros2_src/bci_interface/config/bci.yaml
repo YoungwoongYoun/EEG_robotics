@@ -1,0 +1,14 @@
+bci_node:
+  ros__parameters:
+    cmd_topic: /cmd_vel_bci
+    dwell_sec: 4.0
+    loop: false
+    exit_on_done: true
+
+    mode: infer
+    pt_file: selected_timeseries_with_labels.pt
+    checkpoint: tcformer_state_dict.pth
+
+    class_names: ["LEFT", "RIGHT", "FEET", "TONGUE"]
+    v_list: [0.0, 0.0, 0.3, 0.0]
+    w_list: [0.3927, -0.3927, 0.0, 0.0]

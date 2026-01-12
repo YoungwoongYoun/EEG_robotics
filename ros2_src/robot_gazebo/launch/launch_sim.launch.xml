@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+
+<launch>
+    <!-- args -->
+    <arg name="robot_name" default="wheelchair"/>
+    <arg name="use_sim_time" default="true"/>
+    <arg name="bridge_params" default="$(find-pkg-share robot_gazebo)/params/robot_bridge.yaml"/>
+    <arg name="world" default="$(find-pkg-share robot_gazebo)/worlds/bci_seq_s_course.sdf"/>
+
+    <set_env name="GZ_SIM_RESOURCE_PATH" value="$(find-pkg-share robot_description)/../:/$(find-pkg-share robot_gazebo)/"/>
+
+    <!-- 1) Gazebo server (with world) -->
+    <include file="$(find-pkg-share ros_gz_sim)/launch/gz_sim.launch.py">
+        <arg name="gz_args" value="-r -s -v4 $(var world)"/>
+        <arg name="on_exit_shutdown" value="true"/>
+    </include>
+
+    <!-- 2) Gazebo GUI (same world) -->
+    <include file="$(find-pkg-share ros_gz_sim)/launch/gz_sim.launch.py">
+        <arg name="gz_args" value="-g -v4 $(var world)"/>
+    </include>
+
+    <!-- 3) robot_description -->
+    <include file="$(find-pkg-share robot_description)/launch/display.launch.py">
+        <arg name="use_sim_time" value="$(var use_sim_time)"/>
+    </include>
+
+    <!-- 4) Spawn entity -->
+    <node pkg="ros_gz_sim" exec="create" name="create" output="screen"
+            args="-name $(var robot_name) -topic robot_description -x 0.0 -y 0.0 -z 0.2">
+        <param name="use_sim_time" value="$(var use_sim_time)"/>
+    </node>
+
+    <!-- 5) Bridge -->
+    <node pkg="ros_gz_bridge" exec="parameter_bridge" name="parameter_bridge" output="screen"
+            args="--ros-args -p config_file:=$(var bridge_params)">
+        <param name="use_sim_time" value="$(var use_sim_time)"/>
+    </node>
+</launch>
