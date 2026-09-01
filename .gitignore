@@ -1,0 +1,23 @@
+# Local datasets and generated experiment artifacts
+data/raw/
+data/labels/
+artifacts/
+
+# Python/Jupyter
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+.venv/
+
+# Model checkpoints and local logs
+*.pth
+*.pt
+*.ckpt
+*.bag
+*.db3
+
+# Small files required by the packaged ROS2 demonstration
+!ros2_src/bci_interface/config/tcformer_state_dict.pth
+!ros2_src/bci_interface/config/selected_timeseries_with_labels.pt

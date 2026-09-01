@@ -1,0 +1,58 @@
+name: wgan_gp
+method: wgan_gp
+seed: 0
+device: cuda:0
+
+source:
+  arrays_dir: artifacts/preprocessed/bcic2a/canonical_mi9/arrays
+  normalization_dir: artifacts/preprocessed/bcic2a/canonical_mi9/normalization
+  input_key: x_mi9
+  target_key: x_true22
+
+output:
+  arrays_dir: artifacts/model_inputs/restored/gan/wgan_gp_canonical_mi9/arrays
+  experiment_dir: artifacts/experiments/restoration/gan/wgan_gp_canonical_mi9
+  array_key: x_restored22
+
+training:
+  epochs: 250
+  batch_size: 32
+  learning_rate: 0.0001
+  weight_decay: 0.0
+  optimizer: adam
+  beta_1: 0.5
+  beta_2: 0.9
+  patience: 30
+  min_delta: 0.000001
+  num_workers: 0
+  # Gradient penalty is evaluated in float32 for numerical stability.
+  amp: false
+  deterministic: true
+  allow_tf32: true
+
+# The generator is exactly the time-only AE. The critic is conditional on the
+# observed MI-9 embedded at its canonical 22-channel positions.
+model:
+  generator:
+    hidden_channels: 64
+    bottleneck_channels: 32
+    dilations: [1, 2, 4, 8]
+    dropout: 0.1
+  critic:
+    base_channels: 32
+    channel_multipliers: [1, 2, 4, 4]
+    kernel_size: 7
+    stride: 2
+
+gan:
+  gradient_penalty_weight: 10.0
+  adversarial_weight: 0.1
+  reconstruction_weight: 1.0
+  critic_steps: 5
+
+inference:
+  batch_size: 64
+  seed: 1000
+  sampler: deterministic
+  sampling_steps: 1
+  eta: 0.0

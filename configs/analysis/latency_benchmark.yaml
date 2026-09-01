@@ -1,0 +1,48 @@
+id: latency_benchmark
+source_arrays_dir: artifacts/preprocessed/bcic2a/canonical_mi9/arrays
+output_dir: artifacts/experiments/system/latency_benchmark
+classifier_seed: 0
+benchmark_seed: 20260812
+cpu_threads: 1
+allow_tf32: true
+warmup_trials: 20
+trials_per_subject_class: 8
+
+methods:
+  - id: true22
+    label: True 22-channel
+    kind: true22
+    classification_config: configs/classification/baselines/true22.yaml
+  - id: direct_mi9
+    label: Direct MI-9
+    kind: direct_mi9
+    classification_config: configs/classification/baselines/direct_mi9.yaml
+  - id: zero_padded_mi9
+    label: Zero-padded MI-9
+    kind: zero_padded
+    classification_config: configs/classification/baselines/zero_padded_mi9.yaml
+  - id: spherical_spline
+    label: Spherical spline
+    kind: spherical_spline
+    classification_config: configs/classification/restored/spherical_spline.yaml
+    restoration_config: configs/restoration/spherical_spline.yaml
+  - id: autoencoder
+    label: Autoencoder
+    kind: learned
+    classification_config: configs/classification/restored/autoencoder.yaml
+    restoration_config: configs/restoration/autoencoder.yaml
+  - id: autoencoder_eeg_aware
+    label: EEG-aware autoencoder
+    kind: learned
+    classification_config: configs/classification/restored/autoencoder_eeg_aware.yaml
+    restoration_config: configs/restoration/autoencoder_eeg_aware.yaml
+  - id: ddpm_standard
+    label: Standard DDPM (DDIM-100)
+    kind: learned
+    classification_config: configs/classification/restored/ddpm_standard.yaml
+    restoration_config: configs/restoration/ddpm_standard.yaml
+  - id: wgan_gp
+    label: Conditional WGAN-GP
+    kind: learned
+    classification_config: configs/classification/restored/wgan_gp.yaml
+    restoration_config: configs/restoration/wgan_gp.yaml

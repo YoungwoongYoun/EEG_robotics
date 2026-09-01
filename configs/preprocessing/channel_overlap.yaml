@@ -1,0 +1,38 @@
+# Four fixed, anatomically symmetric nine-channel montages. "Overlap" means
+# exact channel-name overlap with the canonical MI-9, not a claim that every
+# remaining BCIC2a electrode is non-motor.
+raw_dir: data/raw
+labels_dir: data/labels
+output_dir: artifacts/preprocessed/bcic2a/channel_overlap
+
+subjects: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+low_frequency: 8.0
+high_frequency: 30.0
+epoch_tmin: 0.0
+epoch_tmax: 4.0
+reject_flagged_trials: true
+validation_fraction: 0.2
+random_seed: 42
+
+# The classifier reads NPZ directly, so duplicate TensorDataset exports are
+# intentionally disabled for this sensitivity study.
+export_torch: false
+
+montages:
+  overlap_0:
+    label: 0/9 canonical MI-9 overlap
+    expected_mi9_overlap: 0
+    channels: [Fz, FC3, FC4, C5, C6, CP3, CP4, P1, P2]
+  overlap_2:
+    label: 2/9 canonical MI-9 overlap
+    expected_mi9_overlap: 2
+    channels: [Fz, FC3, FC4, C3, C4, CP3, CP4, P1, P2]
+  overlap_4:
+    label: 4/9 canonical MI-9 overlap
+    expected_mi9_overlap: 4
+    channels: [Fz, FC1, FC2, C3, C4, CP3, CP4, P1, P2]
+  overlap_7:
+    label: 7/9 canonical MI-9 overlap
+    expected_mi9_overlap: 7
+    channels: [FC1, FC2, C3, Cz, C4, CP3, CP1, CP2, CP4]

@@ -1,0 +1,55 @@
+name: spherical_spline
+output_dir: artifacts/experiments/classification/restoration_benchmarks
+subjects: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+seeds: [0, 1, 2, 3, 4]
+device: cuda:0
+
+input:
+  id: spherical_spline
+  label: Spherical-spline restored 22-channel
+  category: restored
+  arrays_dir: artifacts/model_inputs/restored/spherical_spline/canonical_mi9/arrays
+  array_key: x_restored22
+  n_channels: 22
+  transform: none
+
+training: &training
+  epochs: 125
+  batch_size: 48
+  learning_rate: 0.0009
+  weight_decay: 0.001
+  optimizer: adam
+  beta_1: 0.5
+  beta_2: 0.999
+  scheduler: warmup_cosine
+  warmup_epochs: 3
+  sr_augmentation: true
+  sr_segments: 7
+  early_stopping_patience: 125
+  early_stopping_min_delta: 0.0
+  num_workers: 0
+  amp: true
+  deterministic: true
+  allow_tf32: true
+
+model:
+  n_classes: 4
+  reference_url: https://github.com/Altaheri/TCFormer
+  reference_commit: 74c89b7ab8c64e4eb51e0f748dd87dd4c94e68c5
+  args:
+    F1: 32
+    temp_kernel_lengths: [20, 32, 64]
+    pool_length_1: 8
+    pool_length_2: 7
+    D: 2
+    dropout_conv: 0.4
+    d_group: 16
+    tcn_depth: 2
+    kernel_length_tcn: 4
+    dropout_tcn: 0.3
+    use_group_attn: true
+    q_heads: 4
+    kv_heads: 2
+    trans_depth: 5
+    trans_dropout: 0.4
+    drop_path_max: 0.25

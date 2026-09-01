@@ -1,0 +1,17 @@
+# Paths are resolved from the project root.
+raw_dir: data/raw
+labels_dir: data/labels
+output_dir: artifacts/preprocessed/bcic2a/canonical_mi9
+
+subjects: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+low_frequency: 8.0
+high_frequency: 30.0
+epoch_tmin: 0.0
+epoch_tmax: 4.0
+reject_flagged_trials: true
+
+# Session 1 only. Session 2 remains untouched until final evaluation.
+validation_fraction: 0.2
+random_seed: 42
+export_torch: true

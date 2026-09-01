@@ -1,0 +1,53 @@
+name: autoencoder_spatial
+method: autoencoder
+seed: 0
+device: cuda:1
+
+source:
+  arrays_dir: artifacts/preprocessed/bcic2a/canonical_mi9/arrays
+  normalization_dir: artifacts/preprocessed/bcic2a/canonical_mi9/normalization
+  input_key: x_mi9
+  target_key: x_true22
+
+output:
+  arrays_dir: artifacts/model_inputs/restored/autoencoder/spatial_canonical_mi9/arrays
+  experiment_dir: artifacts/experiments/restoration/autoencoder/spatial_canonical_mi9
+  array_key: x_restored22
+
+training:
+  epochs: 250
+  batch_size: 32
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  optimizer: adamw
+  beta_1: 0.9
+  beta_2: 0.999
+  patience: 30
+  min_delta: 0.000001
+  num_workers: 0
+  amp: true
+  deterministic: true
+  allow_tf32: true
+
+# Same architecture as the time-only and combined EEG-aware autoencoders.
+model:
+  hidden_channels: 64
+  bottleneck_channels: 32
+  dilations: [1, 2, 4, 8]
+  dropout: 0.1
+
+loss:
+  objective: eeg_spectral_spatial
+  time_weight: 1.0
+  bandpower_weight: 0.0
+  spatial_weight: 1.0
+  sampling_rate: 250.0
+  bands: [[8.0, 13.0], [13.0, 30.0]]
+  epsilon: 0.000001
+
+inference:
+  batch_size: 64
+  seed: 1000
+  sampler: deterministic
+  sampling_steps: 1
+  eta: 0.0

@@ -1,0 +1,5 @@
+numpy>=1.26,<3
+scipy>=1.11,<2
+mne>=1.7,<2
+PyYAML>=6,<7
+jupyterlab>=4,<5

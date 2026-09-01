@@ -1,0 +1,25 @@
+name: spherical_spline
+method: spherical_spline
+seed: 0
+device: cpu
+
+source:
+  arrays_dir: artifacts/preprocessed/bcic2a/canonical_mi9/arrays
+  normalization_dir: artifacts/preprocessed/bcic2a/canonical_mi9/normalization
+  input_key: x_mi9
+  target_key: x_true22
+
+output:
+  arrays_dir: artifacts/model_inputs/restored/spherical_spline/canonical_mi9/arrays
+  experiment_dir: artifacts/experiments/restoration/spherical_spline/canonical_mi9
+  array_key: x_restored22
+
+model:
+  alpha: 0.00001
+
+inference:
+  batch_size: 32
+  seed: 1000
+  sampler: deterministic
+  sampling_steps: 1
+  eta: 0.0
